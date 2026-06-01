@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: MIT
+// Compatible with OpenZeppelin Contracts ^5.6.0
+pragma solidity ^0.8.35;
+
+import {Test} from "forge-std/Test.sol";
+import {console} from "forge-std/console.sol";
+import {ERC1155Auth} from "../src/ERC1155Auth.sol";
+import {Roles} from "../src/Roles.sol";
+
+contract ERC1155AuthTest is Test {
+    ERC1155Auth public erc1155Auth;
+
+    address public constant admin = address(0x123);
+    address public constant minter = address(0x456);
+    address public constant manager = address(0x789);
+    address public constant user1 = address(0xabc);
+    address public constant user2 = address(0xdef);
+
+    function setUp() public {
+        vm.startPrank(admin);
+
+        erc1155Auth = new ERC1155Auth();
+
+        erc1155Auth.grantRole(Roles.MINTER_ROLE, minter);
+        erc1155Auth.grantRole(Roles.MENEGER_ROLE, manager);
+    }
+
+    function testDeployment() public view{
+        // ამ ტესტის მიზანია დავრწმუნდეთ, რომ კონტრაქტი წარმატებით დეპლოებულია და მისამართი არ არის ნული (address(0)).
+        assert(address(erc1155Auth) != address(0));
+
+        // ვიძახებთ erc1155Auth.hasRole ფუნქციას, რომელიც არის AccessControl-ის ნაწილი
+        // და გადავცემთ მას erc1155Auth.DEFAULT_ADMIN_ROLE() და ეს უნდა უდრიდეს admin მისამართს.
+        assertTrue(erc1155Auth.hasRole((erc1155Auth.DEFAULT_ADMIN_ROLE()), admin));
+
+        assertTrue(erc1155Auth.hasRole(Roles.MINTER_ROLE, minter));
+        assertTrue(erc1155Auth.hasRole(Roles.MENEGER_ROLE, manager));
+
+        console.log("ERC1155Auth", address(erc1155Auth));
+    }
+
+    function testMint() public{
+        vm.startPrank(minter);
+        string memory tokenUri = "https://example.com/token/1";
+        erc1155Auth.mint(user1, 10, tokenUri);
+        vm.stopPrank();
+
+        assertEq(erc1155Auth.balanceOf(user1, 0), 10);
+        assertEq(erc1155Auth.uri(0), tokenUri);
+    }
+
+    function testUpdateTokenUri() public{
+        testMint();
+
+        vm.startPrank(manager);
+        string memory newTokenUri = "https://example.com/newTokenUri/2";
+        erc1155Auth.updateUri(0, newTokenUri);
+        vm.stopPrank();
+
+        assertEq(erc1155Auth.uri(0), newTokenUri);
+    }
+
+    function testHasToken() public {
+        testMint();
+
+        // assertTrue იღებს ერთ არგუმენტს და ამოჭმებს არის თუ არა პასუხი True
+        assertTrue(erc1155Auth.hasToken(user1, 0));
+    }
+
+
+
+}
