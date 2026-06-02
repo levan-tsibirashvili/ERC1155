@@ -17,7 +17,7 @@ contract AuthTestDeploy is Script {
 
             AuthTest auth = new AuthTest(erc1155auth);
 
-            console.log("AuthTest deployed at:", address(auth));
+            console.log("AuthTest deployed at:", address(auth)); 
             vm.stopBroadcast();
     }
 }
