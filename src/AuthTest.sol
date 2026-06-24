@@ -15,13 +15,8 @@ contract AuthTest {
 
     error UserDontHaveToken(uint256 _tokenID);
 
-    // ფუნქცია participate - მონაწილეობის მიღება
     function participate () external {
-        // ვახდენთ ავტორიზაციას ERC1155Auth.sol კონტრაქტის ბაზაზე დაყრდნობით
-        // ანუ თუ msg.sender არ ფლობს ტოკენს N1-ს მაშინ require არ შესრულდება
         require(auth.hasToken(msg.sender, 1), UserDontHaveToken(1));
-
         participations[msg.sender] = true;
     }
-
 }

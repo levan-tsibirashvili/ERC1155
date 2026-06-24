@@ -20,19 +20,15 @@ contract ERC1155AuthTest is Test {
         vm.startPrank(admin);
 
         erc1155Auth = new ERC1155Auth();
-
         erc1155Auth.grantRole(Roles.MINTER_ROLE, minter);
         erc1155Auth.grantRole(Roles.MENEGER_ROLE, manager);
+
+        vm.stopPrank();
     }
 
     function testDeployment() public view{
-        // ამ ტესტის მიზანია დავრწმუნდეთ, რომ კონტრაქტი წარმატებით დეპლოებულია და მისამართი არ არის ნული (address(0)).
         assert(address(erc1155Auth) != address(0));
-
-        // ვიძახებთ erc1155Auth.hasRole ფუნქციას, რომელიც არის AccessControl-ის ნაწილი
-        // და გადავცემთ მას erc1155Auth.DEFAULT_ADMIN_ROLE() და ეს უნდა უდრიდეს admin მისამართს.
         assertTrue(erc1155Auth.hasRole((erc1155Auth.DEFAULT_ADMIN_ROLE()), admin));
-
         assertTrue(erc1155Auth.hasRole(Roles.MINTER_ROLE, minter));
         assertTrue(erc1155Auth.hasRole(Roles.MENEGER_ROLE, manager));
 
@@ -62,8 +58,7 @@ contract ERC1155AuthTest is Test {
 
     function testHasToken() public {
         testMint();
-
-        // assertTrue იღებს ერთ არგუმენტს და ამოჭმებს არის თუ არა პასუხი True
+        
         assertTrue(erc1155Auth.hasToken(user1, 0));
     }
 
